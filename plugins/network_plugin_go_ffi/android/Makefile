@@ -1,6 +1,7 @@
 ANDROID_OUT=../android/src/main/jniLibs
-ANDROID_SDK=$(HOME)/Library/Android/sdk
-NDK_BIN=$(ANDROID_SDK)/ndk/23.1.7779620/toolchains/llvm/prebuilt/darwin-x86_64/bin
+# 在环境变量中设置ANDROID_HOME和NDK_BIN
+# ANDROID_HOME=$(HOME)/Library/Android/sdk
+# NDK_BIN=$(ANDROID_HOME)/ndk/27.0.12077973/toolchains/llvm/prebuilt/windows-x86_64/bin
 GO_MODULE_NAME=network_plugin
 LIB_NAME=lib_${GO_MODULE_NAME}_go_ffi
 GO_SRC_DIR=../go/network_plugin
