@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class DataModel extends ChangeNotifier {
-  List<String>data = <String>["aaa", "bbb"];
+  List<int>data = <int>[1, 2];
 
-  void appendData(String value) {
+  void appendData(int value) {
     data.add(value);
     notifyListeners();
   }

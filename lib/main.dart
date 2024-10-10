@@ -2,6 +2,8 @@ import 'package:chatorrent/model/data_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:network_plugin_go_ffi/network_plugin_go_ffi.dart' as network_plugin_go_ffi;
+
 void main() {
   runApp(
     ChangeNotifierProvider(
@@ -21,7 +23,7 @@ class MainListView extends StatelessWidget {
       itemCount: model.data.length,
       itemBuilder: (BuildContext context, int index) {
         return Text(
-          model.data[index],
+          "${model.data[index]}",
         );
       },
     );
@@ -40,7 +42,8 @@ class MainApp extends StatelessWidget {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            context.read<DataModel>().appendData("${context.read<DataModel>().data.last} ccc");
+            var model = context.read<DataModel>();
+            model.appendData(network_plugin_go_ffi.sum(1, model.data.last));
           },
           tooltip: 'add',
           child: const Icon(Icons.add),  // 保留Icon的const

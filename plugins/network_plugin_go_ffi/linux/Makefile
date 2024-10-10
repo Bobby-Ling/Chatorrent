@@ -1,0 +1,8 @@
+GO_MODULE_NAME=network_plugin
+LIB_NAME=lib_${GO_MODULE_NAME}_go_ffi
+
+windows:
+	CGO_ENABLED=1 \
+	GOOS=linux \
+	GOARCH=amd64 \
+	go build -trimpath -buildmode=c-shared -o ${LIB_NAME}.so ../go/network_plugin/network_plugin.go

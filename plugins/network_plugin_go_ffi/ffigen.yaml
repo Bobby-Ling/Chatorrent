@@ -1,0 +1,25 @@
+# Run with `dart run ffigen --config ffigen.yaml`.
+# 已经修改头文件至go/network_plugin/network_plugin.h
+
+name: NetworkPluginGoFfiBindings
+description: |
+  Bindings for `src/network_plugin_go_ffi.h`.
+
+  Regenerate bindings with `dart run ffigen --config ffigen.yaml`.
+output: 'lib/network_plugin_go_ffi_bindings_generated.dart'
+headers:
+  entry-points:
+    - 'go/network_plugin/network_plugin.h'
+  include-directives:
+    - 'go/network_plugin/network_plugin.h'
+preamble: |
+  // ignore_for_file: always_specify_types
+  // ignore_for_file: camel_case_types
+  // ignore_for_file: non_constant_identifier_names
+comments:
+  style: any
+  length: full
+# 可能报错Couldn't find bin\libclang.dll in specified locations.
+# 需要llvm编译器或指定llvm-path
+# llvm-path:
+  # ['C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\Llvm\x64']
