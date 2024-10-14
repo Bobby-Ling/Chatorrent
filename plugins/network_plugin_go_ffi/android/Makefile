@@ -14,28 +14,28 @@ android-armv7a:
 	GOARCH=arm \
 	GOARM=7 \
 	CC=$(NDK_BIN)/armv7a-linux-androideabi21-clang \
-	go build -buildmode=c-shared -o $(ANDROID_OUT)/armeabi-v7a/${LIB_NAME}.so ${GO_SRC_DIR}/${GO_MODULE_NAME}.go
+	go build -buildmode=c-shared -o $(ANDROID_OUT)/armeabi-v7a/${LIB_NAME}.so ${GO_SRC_DIR}
 
 android-arm64:
 	CGO_ENABLED=1 \
 	GOOS=android \
 	GOARCH=arm64 \
 	CC=$(NDK_BIN)/aarch64-linux-android21-clang \
-	go build -buildmode=c-shared -o $(ANDROID_OUT)/arm64-v8a/${LIB_NAME}.so ${GO_SRC_DIR}/${GO_MODULE_NAME}.go
+	go build -buildmode=c-shared -o $(ANDROID_OUT)/arm64-v8a/${LIB_NAME}.so ${GO_SRC_DIR}
 
 android-x86:
 	CGO_ENABLED=1 \
 	GOOS=android \
 	GOARCH=386 \
 	CC=$(NDK_BIN)/i686-linux-android21-clang \
-	go build -buildmode=c-shared -o $(ANDROID_OUT)/x86/${LIB_NAME}.so ${GO_SRC_DIR}/${GO_MODULE_NAME}.go
+	go build -buildmode=c-shared -o $(ANDROID_OUT)/x86/${LIB_NAME}.so ${GO_SRC_DIR}
 
 android-x86_64:
 	CGO_ENABLED=1 \
 	GOOS=android \
 	GOARCH=amd64 \
 	CC=$(NDK_BIN)/x86_64-linux-android21-clang \
-	go build -buildmode=c-shared -o $(ANDROID_OUT)/x86_64/${LIB_NAME}.so ${GO_SRC_DIR}/${GO_MODULE_NAME}.go
+	go build -buildmode=c-shared -o $(ANDROID_OUT)/x86_64/${LIB_NAME}.so ${GO_SRC_DIR}
 
 install-header:
 	cp $(ANDROID_OUT)/x86_64/${LIB_NAME}.h ${GO_SRC_DIR}/${GO_MODULE_NAME}.h

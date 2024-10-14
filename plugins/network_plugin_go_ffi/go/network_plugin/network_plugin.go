@@ -1,10 +1,16 @@
 // network_plugin.go file
 package main
 
+/*
+#include "register_callback.h"
+*/
+import "C"
 import (
-	"C"
 	"fmt"
+	"net/http"
+	"sync"
 	"time"
+	"unsafe"
 )
 
 // 使用`go build -buildmode=c-shared -o network_plugin.dll network_plugin.go`生成network_plugin.h
@@ -14,18 +20,63 @@ import (
 
 //export sum
 func sum(a C.int, b C.int) C.int {
-    return a + b;
+	return C.add_c(a, b);
 }
 
 //export sum_long_running
 func sum_long_running(a C.int, b C.int) C.int {
-	time.Sleep(5 * time.Second);
-	return a + b;
+	time.Sleep(5 * time.Second)
+	return a + b
+}
+
+
+//export registerCallback
+func registerCallback(binop unsafe.Pointer) {
+	C.register_callback(binop)
+}
+
+func fetchHeader(wg *sync.WaitGroup, mu *sync.Mutex, list *[]string) {
+	defer wg.Done()
+
+	// 发送GET请求
+	resp, err := http.Get("https://www.baidu.com")
+	if err != nil {
+		fmt.Println("Error fetching:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// 获取HTTP头部信息并转换为字符串
+	headers := resp.Header
+
+	// 锁定共享变量，防止并发写入
+	mu.Lock()
+	for key, value := range headers {
+		*list = append(*list, fmt.Sprintf("%s: %s", key, value))
+	}
+	mu.Unlock()
+}
+
+func fetchHeadersConcurrently() []string {
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	list := make([]string, 0)
+
+	// 开启10个goroutines
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go fetchHeader(&wg, &mu, &list)
+	}
+
+	// 等待所有goroutines完成
+	wg.Wait()
+	return list
 }
 
 //export enforce_binding
 func enforce_binding() {}
 
 func main() {
-    fmt.Printf("1 + 2 = %d\n", sum(1, 2));
+	fmt.Printf("1 + 2 = %d\n", sum(1, 2));
+	fmt.Printf("%s", fetchHeadersConcurrently());
 }

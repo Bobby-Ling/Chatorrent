@@ -13,7 +13,7 @@ project(${PROJECT_NAME} LANGUAGES CXX)
 
 set(TARGET_NAME network_plugin_go_ffi_${CMAKE_SYSTEM_NAME})
 
-add_custom_target(${TARGET_NAME})
+add_custom_target(${TARGET_NAME} all)
 
 # 动态获取 CMakeLists.txt 所在的当前目录
 set(MAKEFILE_DIR ${CMAKE_CURRENT_LIST_DIR})
