@@ -25,8 +25,15 @@ func sum(a C.int, b C.int) C.int {
 
 //export sum_long_running
 func sum_long_running(a C.int, b C.int) C.int {
-	time.Sleep(10 * time.Second)
-	return a + b
+	response, err := http.Get("https://example.com")
+    if err != nil {
+        fmt.Println("Error:", err)
+        return -1
+    }
+    defer response.Body.Close()
+
+	time.Sleep(4 * time.Second)
+	return C.int(response.StatusCode)
 }
 
 
