@@ -68,7 +68,7 @@ void main() {
   } else if (Platform.isMacOS) {
     libPath = 'lib_network_plugin_go_ffi.dylib';
   } else if (Platform.isLinux) {
-    libPath = 'libnetwork_plugin.so';
+    libPath = 'lib_network_plugin_go_ffi.so';
   } else {
     throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
   }

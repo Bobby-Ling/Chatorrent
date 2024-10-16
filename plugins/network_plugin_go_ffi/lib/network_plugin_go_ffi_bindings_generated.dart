@@ -57,35 +57,6 @@ class NetworkPluginGoFfiBindings {
   late final _sum_long_running =
       _sum_long_runningPtr.asFunction<int Function(int, int)>();
 
-  int add_c_go(
-    int a,
-    int b,
-  ) {
-    return _add_c_go(
-      a,
-      b,
-    );
-  }
-
-  late final _add_c_goPtr =
-      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Int, ffi.Int)>>(
-          'add_c_go');
-  late final _add_c_go = _add_c_goPtr.asFunction<int Function(int, int)>();
-
-  void registerCallback(
-    ffi.Pointer<ffi.Void> binop,
-  ) {
-    return _registerCallback(
-      binop,
-    );
-  }
-
-  late final _registerCallbackPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-          'registerCallback');
-  late final _registerCallback =
-      _registerCallbackPtr.asFunction<void Function(ffi.Pointer<ffi.Void>)>();
-
   void enforce_binding() {
     return _enforce_binding();
   }
@@ -103,7 +74,7 @@ final class _GoString_ extends ffi.Struct {
   external int n;
 }
 
-typedef ptrdiff_t = ffi.LongLong;
+typedef ptrdiff_t = ffi.Long;
 typedef Dartptrdiff_t = int;
 
 final class GoInterface extends ffi.Struct {

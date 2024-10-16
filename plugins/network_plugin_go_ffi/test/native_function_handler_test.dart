@@ -67,7 +67,8 @@ void main() {
     libPath = 'lib_network_plugin_go_ffi.dll';
   } else if (Platform.isMacOS) {
     libPath = 'lib_network_plugin_go_ffi.dylib';
-  } else if (Platform.isLinux) {
+  } else if (Platform.isLinux || Platform.isAndroid) {
+    // LD_LIBRARY_PATH=$LD_LIBRARY_PATH:. dart run native_function_handler_test.dart
     libPath = 'lib_network_plugin_go_ffi.so';
   } else {
     throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
