@@ -25,7 +25,7 @@ func sum(a C.int, b C.int) C.int {
 
 //export sum_long_running
 func sum_long_running(a C.int, b C.int) C.int {
-	time.Sleep(5 * time.Second)
+	time.Sleep(10 * time.Second)
 	return a + b
 }
 
@@ -71,6 +71,36 @@ func fetchHeadersConcurrently() []string {
 	// 等待所有goroutines完成
 	wg.Wait()
 	return list
+}
+
+
+// Define a WaitGroup to wait for the goroutine to finish
+var wg sync.WaitGroup
+
+// Go function to start a thread and call the dart callback
+func startThread() {
+	// Add a delta of 1 to the WaitGroup, indicating that we're waiting for 1 goroutine
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done() // Mark this goroutine as done when it completes
+
+		fmt.Println("Go thread started, waiting...")
+		time.Sleep(10 * time.Second)
+		fmt.Println("calling Dart callback")
+		sum(1000000, 10000000); // Call the Dart callback function
+		fmt.Println("Dart callback called.")
+	}()
+}
+
+//export start_fetch
+func start_fetch() {
+	startThread()
+
+	// Wait for all goroutines in the WaitGroup to finish
+	wg.Wait()
+
+	fmt.Println("All goroutines finished.")
 }
 
 //export enforce_binding

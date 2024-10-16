@@ -21,5 +21,7 @@ comments:
   length: full
 # 可能报错Couldn't find bin\libclang.dll in specified locations.
 # 需要llvm编译器或指定llvm-path
-# llvm-path:
-  # ['C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\Llvm\x64']
+llvm-path:
+  [
+    'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\Llvm\x64'
+  ]

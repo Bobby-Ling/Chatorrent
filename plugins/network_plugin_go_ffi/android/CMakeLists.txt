@@ -21,7 +21,7 @@ set(MAKEFILE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 add_custom_command(
   TARGET ${TARGET_NAME}
-  POST_BUILD
+  PRE_BUILD
   COMMAND make -C ${MAKEFILE_DIR}
   COMMENT "Running make in ${CMAKE_SYSTEM_NAME}"
 )
