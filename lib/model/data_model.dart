@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart' hide Row;
 import 'package:sqlite3/sqlite3.dart';
 
+import 'package:network_plugin_go_ffi/network_plugin_go_ffi.dart' as network_plugin_go_ffi;
+
 class DataModel extends ChangeNotifier {
   late Database _database;
 
@@ -42,8 +44,8 @@ class DataModel extends ChangeNotifier {
   // 按照索引获取数据（index 从 0 开始）
   String? getData(int index) {
     // 从数据库中查找对应索引的记录
-    final resultSet = _database.select(
-        'SELECT content FROM data WHERE id = ?', [index + 1]);
+    final resultSet =
+        _database.select('SELECT content FROM data WHERE id = ?', [index + 1]);
 
     if (resultSet.isNotEmpty) {
       final row = resultSet.first;
@@ -68,8 +70,17 @@ class DataModel extends ChangeNotifier {
     }
   }
 
+  bool isValidUrl(String url) {
+    const urlPattern = r"^(https?|ftp)://[^\s/$.?#].[^\s]*$";
+    final regExp = RegExp(urlPattern);
+    return regExp.hasMatch(url);
+  }
+
   // 添加新数据
   void appendData(String content) {
+    if (isValidUrl(content)) {
+      content = network_plugin_go_ffi.getHTTPHeaderFirstLine(content);
+    }
     final stmt = _database.prepare('INSERT INTO data (content) VALUES (?)');
     stmt.execute([content]);
     stmt.dispose();

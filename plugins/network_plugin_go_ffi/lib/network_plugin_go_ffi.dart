@@ -1,10 +1,19 @@
 
 import 'dart:async';
 import 'dart:ffi';
+// for toNativeUtf8
+import 'package:ffi/ffi.dart';
 import 'dart:io';
 import 'dart:isolate';
 
 import 'network_plugin_go_ffi_bindings_generated.dart';
+
+String getHTTPHeaderFirstLine(String url) {
+  Pointer<Utf8> result = _bindings.getHTTPHeaderFirstLine(url.toNativeUtf8().cast<Char>()).cast<Utf8>();
+  String dartString = result.toDartString();
+  _bindings.freeCString(result.cast<Char>());
+  return dartString;
+}
 
 /// A very short-lived native function.
 ///

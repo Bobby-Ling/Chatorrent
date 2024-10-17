@@ -57,21 +57,6 @@ class NetworkPluginGoFfiBindings {
   late final _sum_long_running =
       _sum_long_runningPtr.asFunction<int Function(int, int)>();
 
-  int add_c_go(
-    int a,
-    int b,
-  ) {
-    return _add_c_go(
-      a,
-      b,
-    );
-  }
-
-  late final _add_c_goPtr =
-      _lookup<ffi.NativeFunction<ffi.Int Function(ffi.Int, ffi.Int)>>(
-          'add_c_go');
-  late final _add_c_go = _add_c_goPtr.asFunction<int Function(int, int)>();
-
   void registerCallback(
     ffi.Pointer<ffi.Void> binop,
   ) {
@@ -85,6 +70,44 @@ class NetworkPluginGoFfiBindings {
           'registerCallback');
   late final _registerCallback =
       _registerCallbackPtr.asFunction<void Function(ffi.Pointer<ffi.Void>)>();
+
+  void start_fetch() {
+    return _start_fetch();
+  }
+
+  late final _start_fetchPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function()>>('start_fetch');
+  late final _start_fetch = _start_fetchPtr.asFunction<void Function()>();
+
+  ffi.Pointer<ffi.Char> getHTTPHeaderFirstLine(
+    ffi.Pointer<ffi.Char> cUrl,
+  ) {
+    return _getHTTPHeaderFirstLine(
+      cUrl,
+    );
+  }
+
+  late final _getHTTPHeaderFirstLinePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<ffi.Char> Function(
+              ffi.Pointer<ffi.Char>)>>('getHTTPHeaderFirstLine');
+  late final _getHTTPHeaderFirstLine = _getHTTPHeaderFirstLinePtr
+      .asFunction<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>)>();
+
+  /// Free the memory allocated for the C string
+  void freeCString(
+    ffi.Pointer<ffi.Char> cstr,
+  ) {
+    return _freeCString(
+      cstr,
+    );
+  }
+
+  late final _freeCStringPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Char>)>>(
+          'freeCString');
+  late final _freeCString =
+      _freeCStringPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
 
   void enforce_binding() {
     return _enforce_binding();

@@ -2,6 +2,7 @@
 package main
 
 /*
+#include <stdlib.h>
 #include "register_callback.h"
 */
 import "C"
@@ -108,6 +109,33 @@ func start_fetch() {
 	wg.Wait()
 
 	fmt.Println("All goroutines finished.")
+}
+
+//export getHTTPHeaderFirstLine
+func getHTTPHeaderFirstLine(cUrl *C.char) *C.char {
+	// Convert the C string to Go string
+	goUrl := C.GoString(cUrl)
+
+	// Send a GET request to the provided URL
+	resp, err := http.Get(goUrl)
+	if err != nil {
+		return C.CString("Error: Unable to fetch the page.")
+	}
+	defer resp.Body.Close()
+
+	// Get the first line of the HTTP response (status line)
+	statusLine := resp.Status
+
+	// Convert Go string to C string
+	cStatusLine := C.CString(statusLine)
+
+	// Return the C string, needs to be freed by the caller in C
+	return cStatusLine
+}
+// Free the memory allocated for the C string
+//export freeCString
+func freeCString(cstr *C.char) {
+	C.free(unsafe.Pointer(cstr))
 }
 
 //export enforce_binding
