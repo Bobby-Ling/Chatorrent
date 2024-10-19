@@ -6,7 +6,7 @@ set(LIB_NAME "lib_${PROJECT_NAME}")
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-# Go相关源代码目录
+# Go和相关源代码目录
 set(GO_SRC_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(GO_SRCS
     ${GO_SRC_DIR}/network_plugin.go
@@ -24,6 +24,10 @@ set(
     ALL_DEPENDENCIES
     ${GO_SRCS}
     ${OTHER_DEP_FILES}
+)
+set(
+    GEN_SRCS
+    ${PROJECT_DIR}/lib/network_plugin_go_ffi_bindings_generated.dart
 )
 
 # 项目相关目录
@@ -82,10 +86,10 @@ endif()
 message("Go envs: CGO_ENABLED=$ENV{CGO_ENABLED} GOOS=$ENV{GOOS} GOARCH=$ENV{GOARCH} \
         NDK_BIN=$ENV{NDK_BIN} CC=$ENV{CC} GOARM=$ENV{GOARM} ANDROID_ABI=$ENV{ANDROID_ABI}")
 
-include(ExternalProject)
+# include(ExternalProject)
 
 function(add_go_library target_name output_file go_arch go_arm cc)
-    if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+    # if(CMAKE_SYSTEM_NAME STREQUAL "Android")
         # 折中办法, 因为在build时output_file为空(linux/windows正常, 存疑)
         set(src_file_changed 0)
 
@@ -119,57 +123,85 @@ function(add_go_library target_name output_file go_arch go_arm cc)
                 COMMAND ${CMAKE_COMMAND} -E touch ${output_file}
                 COMMENT "Building ${output_file}"
             )
-            execute_process(
-                WORKING_DIRECTORY ${PROJECT_DIR}
-                COMMAND ${CMAKE_COMMAND} -E echo "Generating Dart bindings"
-                COMMAND dart run ffigen --config ffigen.yaml
-                COMMENT "Building ${output_file}"
-                COMMENT "Generating Dart bindings"
-            )
         else()
             message("src not changed!")
         endif()
-    else()
-        add_custom_command(
-            OUTPUT ${output_file}
-            WORKING_DIRECTORY ${GO_SRC_DIR}
-            DEPENDS ${GO_SRCS} ${CGO_HEADERS} ${OTHER_DEP_FILES}
-            COMMAND ${CMAKE_COMMAND} -E echo "Building Go library for ${CMAKE_SYSTEM_NAME} in ${GO_SRC_DIR}"
-            COMMAND ${CMAKE_COMMAND} -E env CGO_ENABLED=1 GOOS=${GOOS} GOARCH=${go_arch} CC=${cc} GOARM=${go_arm} go build -trimpath -buildmode=c-shared -o ${output_file}
-            COMMAND ${CMAKE_COMMAND} -E copy ${output_file} ${PROJECT_DIR}/test
-            COMMAND ${CMAKE_COMMAND} -E copy ${output_file} ${PROJECT_DIR}/example/test
-            COMMAND ${CMAKE_COMMAND} -E touch ${output_file}
-            COMMENT "Building ${output_file}"
-            VERBATIM
-        )
-        add_custom_target(${target_name} ALL DEPENDS ${output_file})
-        add_custom_command(
-            TARGET ${target_name}
-            POST_BUILD
-            WORKING_DIRECTORY ${PROJECT_DIR}
-            COMMAND dart run ffigen --config ffigen.yaml
-            COMMAND ${CMAKE_COMMAND} -E echo "Generating Dart bindings"
-            COMMENT "Generating Dart bindings"
-        )
 
-        # ExternalProject_Add(
-        #     ${target_name}
-        #     BUILD_BYPRODUCTS ${output_file}
-        #     WORKING_DIRECTORY ${GO_SRC_DIR}
-        #     # DEPENDS ${GO_SRCS} ${CGO_HEADERS} ${OTHER_DEP_FILES}
-        #     # PREFIX ${CMAKE_CURRENT_BINARY_DIR}/${target_name}
-        #     SOURCE_DIR ${GO_SRC_DIR}
-        #     # BUILD_COMMAND
-        #     CONFIGURE_COMMAND
-        #         ${CMAKE_COMMAND} -E env CGO_ENABLED=1 GOOS=${GOOS} GOARCH=${go_arch} CC=${cc} GOARM=${go_arm} go build -trimpath -buildmode=c-shared -o ${output_file}
-        #     BUILD_IN_SOURCE 1
-        #     INSTALL_COMMAND
-        #         ${CMAKE_COMMAND} -E copy ${output_file} ${PROJECT_DIR}/test &&
-        #         ${CMAKE_COMMAND} -E copy ${output_file} ${PROJECT_DIR}/example/test &&
-        #         ${CMAKE_COMMAND} -E touch ${output_file}
-        # )
 
+        set(gen_file_changed 0)
+
+        message("GEN_SRCS: ${GEN_SRCS}")
+        if(EXISTS ${GEN_SRCS})
+            file(TIMESTAMP ${GEN_SRCS} gen_out_timestamp)
+            message("gen_out_timestamp: ${output_timestamp}")
+        else()
+            set(gen_file_changed 1)
+            message("${GEN_SRCS} not exists, rebuilding!")
         endif()
+
+        foreach(header_file IN LISTS CGO_HEADERS)
+            file(TIMESTAMP ${header_file} header_timestamp)
+            message("header_file: ${header_file}")
+            message("header_timestamp: ${header_timestamp}")
+
+            if(${header_file} IS_NEWER_THAN ${GEN_SRCS})
+                set(gen_file_changed 1)
+            endif()
+        endforeach()
+
+        if(gen_file_changed)
+            message("re-generating dart!")
+            execute_process(
+                WORKING_DIRECTORY ${PROJECT_DIR}
+                COMMAND ${CMAKE_COMMAND} -E echo "Generating dart bindings"
+                COMMAND dart run ffigen --config ffigen.yaml
+                COMMENT "Generating dart bindings"
+            )
+        else()
+            message(".h not changed!")
+        endif()
+
+    # else()
+    #     add_custom_command(
+    #         OUTPUT ${output_file}
+    #         WORKING_DIRECTORY ${GO_SRC_DIR}
+    #         DEPENDS ${GO_SRCS} ${CGO_HEADERS} ${OTHER_DEP_FILES}
+    #         COMMAND ${CMAKE_COMMAND} -E echo "Building Go library for ${CMAKE_SYSTEM_NAME} in ${GO_SRC_DIR}"
+    #         COMMAND ${CMAKE_COMMAND} -E env CGO_ENABLED=1 GOOS=${GOOS} GOARCH=${go_arch} CC=${cc} GOARM=${go_arm} go build -trimpath -buildmode=c-shared -o ${output_file}
+    #         COMMAND ${CMAKE_COMMAND} -E copy ${output_file} ${PROJECT_DIR}/test
+    #         COMMAND ${CMAKE_COMMAND} -E copy ${output_file} ${PROJECT_DIR}/example/test
+    #         COMMAND ${CMAKE_COMMAND} -E touch ${output_file}
+    #         COMMENT "Building ${output_file}"
+    #         VERBATIM
+    #     )
+    #     add_custom_target(${target_name} ALL DEPENDS ${output_file})
+    #     add_custom_command(
+    #         TARGET ${target_name}
+    #         POST_BUILD
+    #         WORKING_DIRECTORY ${PROJECT_DIR}
+    #         COMMAND dart run ffigen --config ffigen.yaml
+    #         COMMAND ${CMAKE_COMMAND} -E echo "Generating Dart bindings"
+    #         COMMENT "Generating Dart bindings"
+    #     )
+
+    #     # ExternalProject_Add(
+    #     #     ${target_name}
+    #     #     BUILD_BYPRODUCTS ${output_file}
+    #     #     WORKING_DIRECTORY ${GO_SRC_DIR}
+    #     #     # DEPENDS ${GO_SRCS} ${CGO_HEADERS} ${OTHER_DEP_FILES}
+    #     #     # PREFIX ${CMAKE_CURRENT_BINARY_DIR}/${target_name}
+    #     #     SOURCE_DIR ${GO_SRC_DIR}
+    #     #     # BUILD_COMMAND
+    #     #     CONFIGURE_COMMAND
+    #     #         ${CMAKE_COMMAND} -E env CGO_ENABLED=1 GOOS=${GOOS} GOARCH=${go_arch} CC=${cc} GOARM=${go_arm} go build -trimpath -buildmode=c-shared -o ${output_file}
+    #     #     BUILD_IN_SOURCE 1
+    #     #     INSTALL_COMMAND
+    #     #         ${CMAKE_COMMAND} -E copy ${output_file} ${PROJECT_DIR}/test &&
+    #     #         ${CMAKE_COMMAND} -E copy ${output_file} ${PROJECT_DIR}/example/test &&
+    #     #         ${CMAKE_COMMAND} -E touch ${output_file}
+    #     # )
+
+    #     endif()
     set(TARGET_LIB_NAME ${target_name}_library)
     add_library(${TARGET_LIB_NAME} SHARED IMPORTED)
     set_target_properties(
