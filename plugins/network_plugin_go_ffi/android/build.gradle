@@ -43,7 +43,7 @@ android {
     // 使用当前目录CMakeLists.txt
     externalNativeBuild {
         cmake {
-            path = "CMakeLists.txt"
+            path = "../android/CMakeLists.txt"
 
             // The default CMake version for the Android Gradle Plugin is 3.10.2.
             // https://developer.android.com/studio/projects/install-ndk#vanilla_cmake
