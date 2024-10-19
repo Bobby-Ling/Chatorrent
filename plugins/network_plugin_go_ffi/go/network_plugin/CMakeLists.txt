@@ -1,27 +1,12 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.17)
 set(PROJECT_NAME "network_plugin_go_ffi")
 project(${PROJECT_NAME} LANGUAGES C)
 
-set(TARGET_NAME ${PROJECT_NAME})
-# lib_network_plugin_go_ffi
-set(LIB_NAME "lib_${TARGET_NAME}")
+set(LIB_NAME "lib_${PROJECT_NAME}")
 
-# 跨平台设置环境变量
-set(ENV{CGO_ENABLED} "1")
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set(TARGET_LIB_FILE_NAME "lib_${TARGET_NAME}.dll")
-    set(ENV{GOOS} "windows")
-    set(ENV{GOARCH} "amd64")
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(TARGET_LIB_FILE_NAME "lib_${TARGET_NAME}.so")
-    set(ENV{GOOS} "linux")
-    set(ENV{GOARCH} "amd64")
-else()
-    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
-endif()
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
-set(PROJECT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../")
-set(TARGET_LIB_FILE "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_LIB_FILE_NAME}")
+# Go相关源代码目录
 set(GO_SRC_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(GO_SRCS
     ${GO_SRC_DIR}/network_plugin.go
@@ -36,75 +21,137 @@ set(
     ${GO_SRC_DIR}/register_callback.h
 )
 
-message("in ${CMAKE_CURRENT_SOURCE_DIR}")
-message("CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
-message("TARGET_LIB_FILE: ${TARGET_LIB_FILE}")
+# 项目相关目录
+set(PROJECT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
+set(OUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
-add_custom_command(
-    OUTPUT ${TARGET_LIB_FILE}
-    # go build只能在${GO_SRC_DIR}运行
-    WORKING_DIRECTORY ${GO_SRC_DIR}
-    # 文件级别的DEPENDS会检测改动, target级别的DEPENDS会保证target最新
-    DEPENDS
-        ${GO_SRCS} ${CGO_HEADERS} ${OTHER_DEP_FILES}
-    COMMAND
-        ${CMAKE_COMMAND} -E echo "Building Go library for ${CMAKE_SYSTEM_NAME} in ${GO_SRC_DIR}"
-    COMMAND
-        ${CMAKE_COMMAND} -E echo "Go envs: CGO_ENABLED=$ENV{CGO_ENABLED} GOOS=$ENV{GOOS} GOARCH=$ENV{GOARCH} "
-    # -trimpath会移除编译路径信息
-    COMMAND
-        go build -trimpath -buildmode=c-shared -o ${TARGET_LIB_FILE}
-    COMMAND
-        ${CMAKE_COMMAND} -E copy ${TARGET_LIB_FILE} ${PROJECT_DIR}/test
-    COMMAND
-        ${CMAKE_COMMAND} -E copy ${TARGET_LIB_FILE} ${PROJECT_DIR}/example/test
-    COMMAND
-        ${CMAKE_COMMAND} -E touch ${TARGET_LIB_FILE}
-    COMMENT "Building ${TARGET_LIB_FILE}"
-    VERBATIM
-)
+# 一个Platform需要同时支持多个Arch
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(TARGET_LIB_FILE_NAME "lib_${PROJECT_NAME}.dll")
+    set(GOOS "windows")
+    set(GOARCH "amd64")
+    set(ARCHs x86_64)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(TARGET_LIB_FILE_NAME "lib_${PROJECT_NAME}.so")
+    set(GOOS "linux")
+    set(GOARCH "amd64")
+    set(ARCHs x86_64)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Android")
+    set(TARGET_LIB_FILE_NAME "lib_${PROJECT_NAME}.so")
+    set(OUT_DIR ${PROJECT_DIR}/android/src/main/jniLibs)
+    set(GOOS "android")
+    set(ARCHs arm arm64 x86 x86_64)
+    foreach(ARCH ${ARCHs})
+        if (ARCH STREQUAL "arm")
+            list(APPEND ANDROID_ABIs "armeabi-v7a")
+            list(APPEND GOARCHs "arm")
+            list(APPEND GOARMs "7")
+            list(APPEND CCs "$ENV{NDK_BIN}/armv7a-linux-androideabi21-clang")
+        elseif (ARCH STREQUAL "arm64")
+            list(APPEND ANDROID_ABIs "arm64-v8a")
+            list(APPEND GOARCHs "arm64")
+            list(APPEND GOARMs "8")  # 占位符
+            list(APPEND CCs "$ENV{NDK_BIN}/aarch64-linux-android21-clang")
+        elseif (ARCH STREQUAL "x86")
+            list(APPEND ANDROID_ABIs "x86")
+            list(APPEND GOARCHs "386")
+            list(APPEND GOARMs "8")  # 占位符
+            list(APPEND CCs "$ENV{NDK_BIN}/i686-linux-android21-clang")
+        elseif (ARCH STREQUAL "x86_64")
+            list(APPEND ANDROID_ABIs "x86_64")
+            list(APPEND GOARCHs "amd64")
+            list(APPEND GOARMs "8")  # 占位符
+            list(APPEND CCs "$ENV{NDK_BIN}/x86_64-linux-android21-clang")
+        endif()
+    endforeach()
+else()
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
 
-# 与add_custom_command的OUTPUT关联
-add_custom_target(${TARGET_NAME} ALL
-    DEPENDS ${TARGET_LIB_FILE}
-)
+message("Go envs: CGO_ENABLED=$ENV{CGO_ENABLED} GOOS=$ENV{GOOS} GOARCH=$ENV{GOARCH} \
+        NDK_BIN=$ENV{NDK_BIN} CC=$ENV{CC} GOARM=$ENV{GOARM} ANDROID_ABI=$ENV{ANDROID_ABI}")
 
-# 生成Dart绑定
-add_custom_command(
-    TARGET ${TARGET_NAME}
-    POST_BUILD
-    WORKING_DIRECTORY ${PROJECT_DIR}
-    DEPENDS ${TARGET_LIB_FILE}
-    COMMAND
-        dart run ffigen --config ffigen.yaml
-    COMMAND
-        ${CMAKE_COMMAND} -E echo "Generating Dart bindings"
-    COMMENT "Generating Dart bindings"
-)
+function(add_go_library target_name output_file android_abi go_arch go_arm cc)
+    add_custom_command(
+        OUTPUT ${output_file}
+        WORKING_DIRECTORY ${GO_SRC_DIR}
+        DEPENDS ${GO_SRCS} ${CGO_HEADERS} ${OTHER_DEP_FILES}
+        COMMAND ${CMAKE_COMMAND} -E echo "Building Go library for ${CMAKE_SYSTEM_NAME} in ${GO_SRC_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E env CGO_ENABLED=1 GOOS=${GOOS} GOARCH=${go_arch} ANDROID_ABI=${android_abi} CC=${cc} GOARM=${go_arm} go build -trimpath -buildmode=c-shared -o ${output_file}
+        COMMAND ${CMAKE_COMMAND} -E copy ${output_file} ${PROJECT_DIR}/test
+        COMMAND ${CMAKE_COMMAND} -E copy ${output_file} ${PROJECT_DIR}/example/test
+        COMMAND ${CMAKE_COMMAND} -E touch ${output_file}
+        COMMENT "Building ${output_file}"
+        VERBATIM
+    )
+    add_custom_target(${target_name} ALL DEPENDS ${output_file})
+    add_custom_command(
+        TARGET ${target_name}
+        POST_BUILD
+        WORKING_DIRECTORY ${PROJECT_DIR}
+        COMMAND dart run ffigen --config ffigen.yaml
+        COMMAND ${CMAKE_COMMAND} -E echo "Generating Dart bindings"
+        COMMENT "Generating Dart bindings"
+    )
+endfunction()
+
+set(ffi_plugin ${PROJECT_NAME})
+# network_plugin_go_ffi_bundled_libraries本身需要导出
+set(EXPORT_LIB_NAME ${ffi_plugin}_bundled_libraries CACHE STRING "network_plugin_go_ffi_bundled_libraries")
+# 最终每个Arch会有一个目标
+# enumerate()
+
+message("${ARCHs} ${ANDROID_ABIs} ${GOARCHs} ${GOARMs} ${CCs}")
 
 
-add_library(${LIB_NAME} SHARED IMPORTED)
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    # ARCHs是LIST变量名
+    foreach(ARCH IN LISTS ARCHs)
+        set(TARGET_NAME ${PROJECT_NAME}_${ARCH})
+        set(TARGET_LIB_FILE ${OUT_DIR}/${TARGET_LIB_FILE_NAME})
 
-set_target_properties(
-    ${LIB_NAME} PROPERTIES
-    IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/${TARGET_LIB_FILE_NAME}
-    PUBLIC_HEADER ${CMAKE_CURRENT_LIST_DIR}/${CGO_HEADERS}
-)
+        message("TARGET_LIB_FILE: ${TARGET_LIB_FILE} ${TARGET_NAME}")
+        message("ARCH:[${ARCH}]\t ANDROID_ABI:[${ANDROID_ABI}]\t GOARCH:[${GOARCH}]\t GOARM:[${GOARM}]\t CC:[${CC}]")
+        # 空变量作为占位符
+        add_go_library(${TARGET_NAME} ${TARGET_LIB_FILE} "" "" "" "")
+        # 之后network_plugin_go_ffi_bundled_libraries作为LIST
+        list(APPEND ${EXPORT_LIB_NAME} ${TARGET_LIB_FILE})
+    endforeach()
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Android")
+    # 3.17
+    foreach(ARCH ANDROID_ABI GOARCH GOARM CC IN ZIP_LISTS ARCHs ANDROID_ABIs GOARCHs GOARMs CCs)
+        set(TARGET_NAME ${PROJECT_NAME}_${ARCH})
+        set(TARGET_LIB_FILE ${OUT_DIR}/${ARCH}/${TARGET_LIB_FILE_NAME})
+
+        message("TARGET_LIB_FILE: ${TARGET_LIB_FILE} ${TARGET_NAME}")
+        message("ARCH:[${ARCH}]\t ANDROID_ABI:[${ANDROID_ABI}]\t GOARCH:[${GOARCH}]\t GOARM:[${GOARM}]\t CC:[${CC}]")
+        add_go_library(${TARGET_NAME} ${TARGET_LIB_FILE} ${ANDROID_ABI} ${GOARCH} ${GOARM} ${CC})
+        # 之后network_plugin_go_ffi_bundled_libraries作为LIST
+        list(APPEND ${EXPORT_LIB_NAME} ${TARGET_LIB_FILE})
+    endforeach()
+endif()
+
+# ${${EXPORT_LIB_NAME}}是值
+set(${EXPORT_LIB_NAME} ${${EXPORT_LIB_NAME}} CACHE STRING "全局可见的${TARGET_LIB_FILE}")
+
+foreach(arch_lib ${${EXPORT_LIB_NAME}})
+    message(NOTICE "EXPORT_LIB_NAME: ${arch_lib}")
+endforeach()
 
 # 暴露的变量
-set(ffi_plugin ${TARGET_NAME})
-# CACHE set使得${TARGET_LIB_FILE}在全局目录可见(否则只能传递一层目录且在本文件会为空)
-set(
-    TARGET_LIB_FILE ${TARGET_LIB_FILE}
-    CACHE STRING "TARGET_LIB_FILE在全局目录可见"
-)
-set(${ffi_plugin}_bundled_libraries
-    # Defined in ../src/CMakeLists.txt.
-    # This can be changed to accommodate different builds.
-    # ..\src\CMakeLists.txt中有:
-    # add_library(network_plugin_go_ffi SHARED
-    # "network_plugin_go_ffi.c"
-    # )
-    ${TARGET_LIB_FILE}
-    CACHE STRING "全局可见的${ffi_plugin}_bundled_libraries"
-)
+# set(ffi_plugin ${PROJECT_NAME})
+# # CACHE set使得${TARGET_LIB_FILE}在全局目录可见(否则只能传递一层目录且在本文件会为空)
+# set(
+#     TARGET_LIB_FILE ${TARGET_LIB_FILE}
+#     CACHE STRING "TARGET_LIB_FILE在全局目录可见"
+# )
+# set(${ffi_plugin}_bundled_libraries
+#     # Defined in ../src/CMakeLists.txt.
+#     # This can be changed to accommodate different builds.
+#     # ..\src\CMakeLists.txt中有:
+#     # add_library(network_plugin_go_ffi SHARED
+#     # "network_plugin_go_ffi.c"
+#     # )
+#     ${TARGET_LIB_FILE}
+#     CACHE STRING "全局可见的${ffi_plugin}_bundled_libraries"
+# )
