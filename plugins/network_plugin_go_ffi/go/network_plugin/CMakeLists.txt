@@ -6,6 +6,13 @@ set(LIB_NAME "lib_${PROJECT_NAME}")
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+# 项目相关目录
+set(PROJECT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
+set(OUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
+message("PROJECT_DIR: ${PROJECT_DIR}")
+message("CMAKE_CURRENT_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}")
+message("PROJECT_BINARY_DIR  ${PROJECT_BINARY_DIR}")
+
 # Go和相关源代码目录
 set(GO_SRC_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(GO_SRCS
@@ -30,9 +37,6 @@ set(
     ${PROJECT_DIR}/lib/network_plugin_go_ffi_bindings_generated.dart
 )
 
-# 项目相关目录
-set(PROJECT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
-set(OUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 # 一个Platform需要同时支持多个Arch
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
