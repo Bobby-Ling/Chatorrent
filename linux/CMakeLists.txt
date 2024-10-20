@@ -91,6 +91,8 @@ set_target_properties(${BINARY_NAME}
 # them to the application.
 include(flutter/generated_plugins.cmake)
 
+# 通用cmake配置
+include(../common/ensure_native_assets.cmake)
 
 # === Installation ===
 # By default, "installing" just makes a relocatable bundle in the build

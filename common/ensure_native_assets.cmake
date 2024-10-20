@@ -1,0 +1,17 @@
+# 第一次编译时build/native_assets/ 可能不存在, 要手动创建
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(PLATFORM_PATH "../build/native_assets/linux")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(PLATFORM_PATH "../build/native_assets/windows")
+# elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+#     set(PLATFORM_PATH "../build/native_assets/macos")
+else()
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
+
+if(NOT EXISTS ${PLATFORM_PATH})
+    file(MAKE_DIRECTORY ${PLATFORM_PATH})
+    message(STATUS "Created directory: ${PLATFORM_PATH}")
+else()
+    message(STATUS "Directory already exists: ${PLATFORM_PATH}")
+endif()
