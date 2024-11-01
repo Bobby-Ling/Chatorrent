@@ -1,74 +1,51 @@
+import 'package:chatorrent/main_page.dart';
+import 'package:chatorrent/model/data_model.dart';
+import 'package:chatorrent/model/group_chat_data_model.dart';
+import 'package:chatorrent/model/message_data_model.dart';
+import 'package:chatorrent/pages/list_demo.dart';
+import 'package:chatorrent/pages/group_chat_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'model/data_model.dart';
 
 void main() {
   runApp(
     ChangeNotifierProvider(
       create: (BuildContext context) => DataModel(),
-      child: MainApp(),
+      child: MyApp(),
     ),
   );
 }
 
-class MainApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('data model demo'),
-        ),
-        body: Column(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Enter a string',
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: (value) {
-                  Provider.of<DataModel>(context, listen: false).inputValue = value;
-                },
+      title: 'Chat App',
+      theme: ThemeData(
+          primarySwatch: Colors.blue,
+          brightness: Brightness.light,
+          fontFamily: "微软雅黑"),
+      home: NavigationPage(),
+      routes: {
+        '/contacts': (context) => PageWithAppBar(
+              title: 'Contacts',
+              child: ListDemo(),
+            ),
+        '/groups': (context) => PageWithAppBar(
+              title: 'Groups',
+              child: ChangeNotifierProvider(
+                create: (BuildContext context) => GroupChatDataModel(),
+                child: GroupChatPage(),
               ),
             ),
-            const Expanded(
-              child: MainListView(),
+        '/messages': (context) => PageWithAppBar(
+              title: 'Messages',
+              child: ListDemo(),
             ),
-          ],
-        ),
-        floatingActionButton: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            FloatingActionButton(
-              onPressed: () {
-                Provider.of<DataModel>(context, listen: false).acceptData();
-              },
-              tooltip: 'Append Data',
-              child: const Icon(Icons.add),
+        '/settings': (context) => PageWithAppBar(
+              title: 'Settings',
+              child: ListDemo(),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class MainListView extends StatelessWidget {
-  const MainListView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    var model = Provider.of<DataModel>(context);
-    return ListView.builder(
-      itemCount: model.length,
-      itemBuilder: (BuildContext context, int index) {
-        return ListTile(
-          title: Text(
-            "${model.getData(index)}",
-          ),
-        );
       },
     );
   }
