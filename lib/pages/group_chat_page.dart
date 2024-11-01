@@ -32,10 +32,7 @@ class GroupChatPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChangeNotifierProvider(
-                    create: (BuildContext context) => MessageDataModel(),
-                    child: ChatPage(groupId: groupChat['id']),
-                  ),
+                  builder: (context) => ChatPage(groupId: groupChat['id']),
                 ),
               );
             },

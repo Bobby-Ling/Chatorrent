@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:sqlite3/sqlite3.dart';
 
@@ -6,6 +8,7 @@ class MessageDataModel extends ChangeNotifier {
 
   MessageDataModel() {
     debugPrint("MessageDataModel init");
+    _startMessageInsertion();
     _initDatabase();
   }
 
@@ -78,8 +81,31 @@ class MessageDataModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Timer? _timer;
+  int _messageCounter = 0;
+
+  void _startMessageInsertion() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      _insertMessage();
+    });
+  }
+
+  void _insertMessage() {
+    _messageCounter++;
+    String content = "Message $_messageCounter";
+    String timestamp = DateTime.now().toIso8601String();
+
+    final stmt = _database.prepare(
+        'INSERT INTO messages (group_id, content, timestamp) VALUES (?, ?, ?)');
+    stmt.execute([1, content, timestamp]);
+    stmt.dispose();
+
+    notifyListeners();
+  }
+
   @override
   void dispose() {
+    debugPrint("MessageDataModel disposed!");
     _database.dispose();
     super.dispose();
   }
