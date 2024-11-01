@@ -9,8 +9,15 @@ import 'package:provider/provider.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (BuildContext context) => DataModel(),
+    // 都是全局单例, 只能初始化一次
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (BuildContext context) => DataModel()),
+        ChangeNotifierProvider(
+            create: (BuildContext context) => GroupChatDataModel()),
+        ChangeNotifierProvider(
+            create: (BuildContext context) => MessageDataModel()),
+      ],
       child: MyApp(),
     ),
   );
@@ -33,10 +40,7 @@ class MyApp extends StatelessWidget {
             ),
         '/groups': (context) => PageWithAppBar(
               title: 'Groups',
-              child: ChangeNotifierProvider(
-                create: (BuildContext context) => GroupChatDataModel(),
-                child: GroupChatPage(),
-              ),
+              child: GroupChatPage(),
             ),
         '/messages': (context) => PageWithAppBar(
               title: 'Messages',
