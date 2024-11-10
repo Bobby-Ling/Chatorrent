@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 class ChatPage extends StatelessWidget {
   final int groupId; // or use `String groupName` if preferred
 
-  ChatPage({required this.groupId});
+  const ChatPage({super.key, required this.groupId});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class ChatPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Chat - Group #$groupId'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
       ),

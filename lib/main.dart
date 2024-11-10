@@ -24,6 +24,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -32,21 +34,21 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
           brightness: Brightness.light,
           fontFamily: "微软雅黑"),
-      home: NavigationPage(),
+      home: const NavigationPage(),
       routes: {
-        '/contacts': (context) => PageWithAppBar(
+        '/contacts': (context) => const PageWithAppBar(
               title: 'Contacts',
               child: ListDemo(),
             ),
-        '/groups': (context) => PageWithAppBar(
+        '/groups': (context) => const PageWithAppBar(
               title: 'Groups',
               child: GroupChatPage(),
             ),
-        '/messages': (context) => PageWithAppBar(
+        '/messages': (context) => const PageWithAppBar(
               title: 'Messages',
               child: ListDemo(),
             ),
-        '/settings': (context) => PageWithAppBar(
+        '/settings': (context) => const PageWithAppBar(
               title: 'Settings',
               child: ListDemo(),
             ),

@@ -81,11 +81,12 @@ class MessageDataModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ignore: unused_field
   Timer? _timer;
   int _messageCounter = 0;
 
   void _startMessageInsertion() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _insertMessage();
     });
   }

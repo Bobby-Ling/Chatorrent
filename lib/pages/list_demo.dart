@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ListDemo extends StatelessWidget {
+  const ListDemo({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

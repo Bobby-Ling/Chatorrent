@@ -4,7 +4,7 @@ class PageWithAppBar extends StatelessWidget {
   final String title;
   final Widget child;
 
-  const PageWithAppBar({required this.title, required this.child});
+  const PageWithAppBar({super.key, required this.title, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +12,7 @@ class PageWithAppBar extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             // 不能在Navigator的本层调用, 因此外面要包一层PageWithAppBar
             Navigator.pop(context);
@@ -25,11 +25,13 @@ class PageWithAppBar extends StatelessWidget {
 }
 
 class NavigationPage extends StatelessWidget {
+  const NavigationPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Navigation'),
+        title: const Text('Navigation'),
       ),
       body: GridView.count(
         crossAxisCount: 2,
@@ -58,7 +60,8 @@ class NavigationPage extends StatelessWidget {
             title: 'Messages',
             icon: Icons.message,
             onTap: () {
-              Navigator.pushNamed(context, '/messages');
+              // Navigator.pushNamed(context, '/messages');
+              Navigator.pushNamed(context, '/groups');
             },
           ),
           _buildNavigationCard(
@@ -89,9 +92,9 @@ class NavigationPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 50, color: Theme.of(context).primaryColor),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(title,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
