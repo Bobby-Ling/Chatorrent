@@ -14,6 +14,7 @@ dependencies:
     path: plugins/network_plugin_go_ffi
   sqlite3: ^2.4.6
   sqlite3_flutter_libs: ^0.5.24
+  protobuf: ^3.1.0
 
 dev_dependencies:
   flutter_test:
