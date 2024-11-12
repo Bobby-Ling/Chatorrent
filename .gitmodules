@@ -1,0 +1,6 @@
+[submodule "plugins/network_plugin_go_ffi/go/network_plugin/webrtc_connection"]
+	path = plugins/network_plugin_go_ffi/go/network_plugin/webrtc_connection
+	url = git@github.com:fvfv1013/webrtcdemo.git
+[submodule "plugins/network_plugin_go_ffi/go/network_plugin/webrtc_plugin"]
+	path = plugins/network_plugin_go_ffi/go/network_plugin/webrtc_plugin
+	url = git@github.com:fvfv1013/webrtcdemo.git
