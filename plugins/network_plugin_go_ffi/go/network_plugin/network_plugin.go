@@ -40,60 +40,62 @@ const (
 // 内存管理: 输入参数由外部负责, 返回值由自己负责(gc)
 // cgo能够接受的Api:
 
+var placeholder_response = `{"error":{"code":0,"err_str":"OK"},"session_id":123,"data":"test_data"}`
+
 // CreateSession for offer side to create a session
 //export CreateSession
 func CreateSession(SessionID C.int) *C.char {
-	return C.CString("")
+	return C.CString(placeholder_response)
 }
 // Offer return offer BASE64
 //export Offer
 func Offer(SessionID C.int) *C.char {
-	return C.CString("")
+	return C.CString(placeholder_response)
 }
 // JoinSession for answer side to join a session described by SDP
 // 假定sdpBase64是\0结尾字符串
 //export JoinSession
 func JoinSession(SessionID C.int, sdpBase64 *C.char) *C.char {
-	return C.CString("")
+	return C.CString(placeholder_response)
 }
 // Answer can be called after JoinSession
 //export Answer
 func Answer(SessionID C.int) *C.char {
-	return C.CString("")
+	return C.CString(placeholder_response)
 }
 // ConfirmAnswer confirms a session description
 // 假定sdpBase64是\0结尾字符串
 //export ConfirmAnswer
 func ConfirmAnswer(SessionID C.int, sdpBase64 *C.char) *C.char {
-	return C.CString("")
+	return C.CString(placeholder_response)
 }
 // Send add data to send queue, it is not a obstructive function
 //export Send
 func Send(SessionID C.int, data *C.char, size C.int) *C.char {
-	return C.CString("")
+	return C.CString(placeholder_response)
 }
 // Ready return a list of received messages and where are they from
 // 计划使用json返回
 //export Ready
 func Ready() *C.char {
-	return C.CString("")
+	return C.CString(placeholder_response)
 }
 // DropSession allow user to drop a session
 // Warning: don't call DropSession easily, because it is very slow; not-used session will be shutdown automatically
 //export DropSession
 func DropSession(SessionID C.int) *C.char {
-	return C.CString("")
+	return C.CString(placeholder_response)
 }
 // ReloadConfig will force SessionManager reload config from conf.json
 // warning: it may not work immediately
 //export ReloadConfig
 func ReloadConfig() *C.char {
-	return C.CString("")
+	return C.CString(placeholder_response)
 }
 // Discard a SessionManager
 //export Discard
 func Discard() *C.char {
-	return C.CString("")
+	return C.CString(placeholder_response)
 }
 
 //export sum

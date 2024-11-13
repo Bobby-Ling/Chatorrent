@@ -122,17 +122,20 @@ function(add_go_library target_name output_file go_arch go_arm cc)
                 WORKING_DIRECTORY ${GO_SRC_DIR}
                 COMMAND ${CMAKE_COMMAND} -E echo "Building Go library for ${CMAKE_SYSTEM_NAME} in ${GO_SRC_DIR}"
                 COMMAND ${CMAKE_COMMAND} -E env CGO_ENABLED=1 GOOS=${GOOS} GOARCH=${go_arch} CC=${cc} GOARM=${go_arm} go build -trimpath -buildmode=c-shared -o ${output_file}
+                # 这里极有可能由于文件被占用导致copy和touch失败
                 COMMAND ${CMAKE_COMMAND} -E copy ${output_file} ${PROJECT_DIR}/test
                 COMMAND ${CMAKE_COMMAND} -E copy ${output_file} ${PROJECT_DIR}/example/test
                 COMMAND ${CMAKE_COMMAND} -E touch ${output_file}
                 COMMENT "Building ${output_file}"
+                OUTPUT_VARIABLE GO_BUILD_OUTPUT
             )
+            message("GO_BUILD_OUTPUT: ${GO_BUILD_OUTPUT}")
         else()
             message("src not changed!")
         endif()
 
 
-        set(gen_file_changed 1)
+        set(gen_file_changed 0)
 
         message("GEN_SRCS: ${GEN_SRCS}")
         if(EXISTS ${GEN_SRCS})
@@ -183,7 +186,7 @@ function(add_go_library target_name output_file go_arch go_arm cc)
                 ERROR_VARIABLE error
             )
             if(NOT result EQUAL 0)
-                message(FATAL_ERROR "Dart ffigen failed: ${error}")
+                message("Dart ffigen failed: ${error}")
             endif()
 
             message("dart generated!")
