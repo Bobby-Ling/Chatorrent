@@ -132,7 +132,7 @@ function(add_go_library target_name output_file go_arch go_arm cc)
         endif()
 
 
-        set(gen_file_changed 0)
+        set(gen_file_changed 1)
 
         message("GEN_SRCS: ${GEN_SRCS}")
         if(EXISTS ${GEN_SRCS})
@@ -154,13 +154,39 @@ function(add_go_library target_name output_file go_arch go_arm cc)
         endforeach()
 
         if(gen_file_changed)
-            message("re-generating dart!")
+            message("re-generating dart in ${PROJECT_DIR}")
+            # execute_process(
+            #     WORKING_DIRECTORY ${PROJECT_DIR}
+            #     COMMAND ${CMAKE_COMMAND} -E echo "Generating dart bindings"
+            #     COMMAND ${CMAKE_COMMAND} -E env dart run ffigen --config ffigen.yaml
+            #     COMMENT "Generating dart bindings"
+            # )
+            execute_process(
+                COMMAND which dart
+                OUTPUT_VARIABLE DART_PATH
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+            )
+            message("Found dart at: ${DART_PATH}")
+            execute_process(
+                # TODO: 与终端version不一致
+                COMMAND dart --version
+                OUTPUT_VARIABLE DART_VERSION
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+            )
+            message("DART_VERSION: ${DART_VERSION}")
             execute_process(
                 WORKING_DIRECTORY ${PROJECT_DIR}
                 COMMAND ${CMAKE_COMMAND} -E echo "Generating dart bindings"
-                COMMAND dart run ffigen --config ffigen.yaml
-                COMMENT "Generating dart bindings"
+                COMMAND ${CMAKE_COMMAND} -E env dart run ffigen --config ffigen.yaml
+                RESULT_VARIABLE result
+                OUTPUT_VARIABLE output
+                ERROR_VARIABLE error
             )
+            if(NOT result EQUAL 0)
+                message(FATAL_ERROR "Dart ffigen failed: ${error}")
+            endif()
+
+            message("dart generated!")
         else()
             message(".h not changed!")
         endif()
