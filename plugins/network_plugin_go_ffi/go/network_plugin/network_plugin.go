@@ -2,6 +2,10 @@
 package main
 
 /*
+#if !_WIN32
+#define __declspec(dllexport)
+#endif
+
 #include <stdlib.h>
 #include "register_callback.h"
 */
@@ -12,12 +16,85 @@ import (
 	"sync"
 	"time"
 	"unsafe"
+	"webrtc_plugin/sessionmgr"
 )
 
 // 使用`go build -buildmode=c-shared -o network_plugin.dll network_plugin.go`生成network_plugin.h
 // 或在network_plugin_go_ffi/windows下运行make生成network_plugin.h
 // 然后 **network_plugin_go_ffi目录下** `dart run ffigen --config ffigen.yaml`生成network_plugin_go_ffi_bindings_generated.dart
 // 在example目录下运行flutter run等进行测试(可能需要改动main.dart)
+
+// 在一个App实例中唯一存在
+var globalMgr sessionmgr.SessionManager
+
+const (
+	Success     = 0
+	ErrInit     = -1
+	ErrSession  = -2
+	ErrWait     = -3
+	ErrSDP      = -4
+	ErrOther    = -5
+)
+
+// 数据交换: 统一采用string类型交换json
+// 内存管理: 输入参数由外部负责, 返回值由自己负责(gc)
+// cgo能够接受的Api:
+
+// CreateSession for offer side to create a session
+//export CreateSession
+func CreateSession(SessionID C.int) *C.char {
+	return C.CString("")
+}
+// Offer return offer BASE64
+//export Offer
+func Offer(SessionID C.int) *C.char {
+	return C.CString("")
+}
+// JoinSession for answer side to join a session described by SDP
+// 假定sdpBase64是\0结尾字符串
+//export JoinSession
+func JoinSession(SessionID C.int, sdpBase64 *C.char) *C.char {
+	return C.CString("")
+}
+// Answer can be called after JoinSession
+//export Answer
+func Answer(SessionID C.int) *C.char {
+	return C.CString("")
+}
+// ConfirmAnswer confirms a session description
+// 假定sdpBase64是\0结尾字符串
+//export ConfirmAnswer
+func ConfirmAnswer(SessionID C.int, sdpBase64 *C.char) *C.char {
+	return C.CString("")
+}
+// Send add data to send queue, it is not a obstructive function
+//export Send
+func Send(SessionID C.int, data *C.char, size C.int) *C.char {
+	return C.CString("")
+}
+// Ready return a list of received messages and where are they from
+// 计划使用json返回
+//export Ready
+func Ready() *C.char {
+	return C.CString("")
+}
+// DropSession allow user to drop a session
+// Warning: don't call DropSession easily, because it is very slow; not-used session will be shutdown automatically
+//export DropSession
+func DropSession(SessionID C.int) *C.char {
+	return C.CString("")
+}
+// ReloadConfig will force SessionManager reload config from conf.json
+// warning: it may not work immediately
+//export ReloadConfig
+func ReloadConfig() *C.char {
+	return C.CString("")
+}
+// Discard a SessionManager
+//export Discard
+func Discard() *C.char {
+	return C.CString("")
+}
 
 //export sum
 func sum(a C.int, b C.int) C.int {

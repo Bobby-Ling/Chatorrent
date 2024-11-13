@@ -21,6 +21,10 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 
 #line 4 "network_plugin.go"
 
+#if !_WIN32
+#define __declspec(dllexport)
+#endif
+
 #include <stdlib.h>
 #include "register_callback.h"
 
@@ -80,6 +84,41 @@ typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
 extern "C" {
 #endif
 
+
+// CreateSession for offer side to create a session
+extern __declspec(dllexport) char* CreateSession(int SessionID);
+
+// Offer return offer BASE64
+extern __declspec(dllexport) char* Offer(int SessionID);
+
+// JoinSession for answer side to join a session described by SDP
+// 假定sdpBase64是\0结尾字符串
+extern __declspec(dllexport) char* JoinSession(int SessionID, char* sdpBase64);
+
+// Answer can be called after JoinSession
+extern __declspec(dllexport) char* Answer(int SessionID);
+
+// ConfirmAnswer confirms a session description
+// 假定sdpBase64是\0结尾字符串
+extern __declspec(dllexport) char* ConfirmAnswer(int SessionID, char* sdpBase64);
+
+// Send add data to send queue, it is not a obstructive function
+extern __declspec(dllexport) char* Send(int SessionID, char* data, int size);
+
+// Ready return a list of received messages and where are they from
+// 计划使用json返回
+extern __declspec(dllexport) char* Ready();
+
+// DropSession allow user to drop a session
+// Warning: don't call DropSession easily, because it is very slow; not-used session will be shutdown automatically
+extern __declspec(dllexport) char* DropSession(int SessionID);
+
+// ReloadConfig will force SessionManager reload config from conf.json
+// warning: it may not work immediately
+extern __declspec(dllexport) char* ReloadConfig();
+
+// Discard a SessionManager
+extern __declspec(dllexport) char* Discard();
 extern __declspec(dllexport) int sum(int a, int b);
 extern __declspec(dllexport) int sum_long_running(int a, int b);
 extern __declspec(dllexport) void registerCallback(void* binop);

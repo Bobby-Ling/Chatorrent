@@ -1,3 +1,6 @@
 go 1.23.0
 
-use ./webrtc_plugin
+use (
+	.
+	./webrtc_plugin
+)

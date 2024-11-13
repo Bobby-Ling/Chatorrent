@@ -27,6 +27,157 @@ class NetworkPluginGoFfiBindings {
           lookup)
       : _lookup = lookup;
 
+  /// CreateSession for offer side to create a session
+  ffi.Pointer<ffi.Char> CreateSession(
+    int SessionID,
+  ) {
+    return _CreateSession(
+      SessionID,
+    );
+  }
+
+  late final _CreateSessionPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function(ffi.Int)>>(
+          'CreateSession');
+  late final _CreateSession =
+      _CreateSessionPtr.asFunction<ffi.Pointer<ffi.Char> Function(int)>();
+
+  /// Offer return offer BASE64
+  ffi.Pointer<ffi.Char> Offer(
+    int SessionID,
+  ) {
+    return _Offer(
+      SessionID,
+    );
+  }
+
+  late final _OfferPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function(ffi.Int)>>(
+          'Offer');
+  late final _Offer =
+      _OfferPtr.asFunction<ffi.Pointer<ffi.Char> Function(int)>();
+
+  /// JoinSession for answer side to join a session described by SDP
+  /// 假定sdpBase64是\0结尾字符串
+  ffi.Pointer<ffi.Char> JoinSession(
+    int SessionID,
+    ffi.Pointer<ffi.Char> sdpBase64,
+  ) {
+    return _JoinSession(
+      SessionID,
+      sdpBase64,
+    );
+  }
+
+  late final _JoinSessionPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<ffi.Char> Function(
+              ffi.Int, ffi.Pointer<ffi.Char>)>>('JoinSession');
+  late final _JoinSession = _JoinSessionPtr.asFunction<
+      ffi.Pointer<ffi.Char> Function(int, ffi.Pointer<ffi.Char>)>();
+
+  /// Answer can be called after JoinSession
+  ffi.Pointer<ffi.Char> Answer(
+    int SessionID,
+  ) {
+    return _Answer(
+      SessionID,
+    );
+  }
+
+  late final _AnswerPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function(ffi.Int)>>(
+          'Answer');
+  late final _Answer =
+      _AnswerPtr.asFunction<ffi.Pointer<ffi.Char> Function(int)>();
+
+  /// ConfirmAnswer confirms a session description
+  /// 假定sdpBase64是\0结尾字符串
+  ffi.Pointer<ffi.Char> ConfirmAnswer(
+    int SessionID,
+    ffi.Pointer<ffi.Char> sdpBase64,
+  ) {
+    return _ConfirmAnswer(
+      SessionID,
+      sdpBase64,
+    );
+  }
+
+  late final _ConfirmAnswerPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<ffi.Char> Function(
+              ffi.Int, ffi.Pointer<ffi.Char>)>>('ConfirmAnswer');
+  late final _ConfirmAnswer = _ConfirmAnswerPtr.asFunction<
+      ffi.Pointer<ffi.Char> Function(int, ffi.Pointer<ffi.Char>)>();
+
+  /// Send add data to send queue, it is not a obstructive function
+  ffi.Pointer<ffi.Char> Send(
+    int SessionID,
+    ffi.Pointer<ffi.Char> data,
+    int size,
+  ) {
+    return _Send(
+      SessionID,
+      data,
+      size,
+    );
+  }
+
+  late final _SendPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<ffi.Char> Function(
+              ffi.Int, ffi.Pointer<ffi.Char>, ffi.Int)>>('Send');
+  late final _Send = _SendPtr.asFunction<
+      ffi.Pointer<ffi.Char> Function(int, ffi.Pointer<ffi.Char>, int)>();
+
+  /// Ready return a list of received messages and where are they from
+  /// 计划使用json返回
+  ffi.Pointer<ffi.Char> Ready() {
+    return _Ready();
+  }
+
+  late final _ReadyPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>('Ready');
+  late final _Ready = _ReadyPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+
+  /// DropSession allow user to drop a session
+  /// Warning: don't call DropSession easily, because it is very slow; not-used session will be shutdown automatically
+  ffi.Pointer<ffi.Char> DropSession(
+    int SessionID,
+  ) {
+    return _DropSession(
+      SessionID,
+    );
+  }
+
+  late final _DropSessionPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function(ffi.Int)>>(
+          'DropSession');
+  late final _DropSession =
+      _DropSessionPtr.asFunction<ffi.Pointer<ffi.Char> Function(int)>();
+
+  /// ReloadConfig will force SessionManager reload config from conf.json
+  /// warning: it may not work immediately
+  ffi.Pointer<ffi.Char> ReloadConfig() {
+    return _ReloadConfig();
+  }
+
+  late final _ReloadConfigPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
+          'ReloadConfig');
+  late final _ReloadConfig =
+      _ReloadConfigPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+
+  /// Discard a SessionManager
+  ffi.Pointer<ffi.Char> Discard() {
+    return _Discard();
+  }
+
+  late final _DiscardPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>('Discard');
+  late final _Discard =
+      _DiscardPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+
   int sum(
     int a,
     int b,
