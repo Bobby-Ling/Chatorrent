@@ -4,10 +4,14 @@ import 'package:chatorrent/model/group_chat_data_model.dart';
 import 'package:chatorrent/model/message_data_model.dart';
 import 'package:chatorrent/pages/list_demo.dart';
 import 'package:chatorrent/pages/group_chat_page.dart';
+import 'package:chatorrent/pages/settings_page.dart';
+import 'package:chatorrent/services/preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 void main() {
+  SettingsManager.init();
+
   runApp(
     // 都是全局单例, 只能初始化一次
     MultiProvider(
@@ -50,7 +54,7 @@ class MyApp extends StatelessWidget {
             ),
         '/settings': (context) => const PageWithAppBar(
               title: 'Settings',
-              child: ListDemo(),
+              child: SettingsPage(),
             ),
       },
     );
