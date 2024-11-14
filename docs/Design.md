@@ -6,9 +6,15 @@
 
 - Client: 正在运行的App
 - Server: 一般指中心服务器(含信令服务器)
-- User: 通过ID区分
-- Peer: 一个WebRTC连接节点, 一个用户可以是多个Peer
+- User: 通过UserID区分
+- Peer: 一个WebRTC连接节点, 一个用户可以是多个Peer(即设备), 通过PeerID区分
 - Session: 一次P2P的WebRTC会话, 参与者是两个Peer; 两个Peer间可以有多个Session
+
+## 当前简化
+
+- 不管鉴权, 只管注册和登录
+- 不考虑用户多设备登录(即一个UserID唯一对应一个PeerID)
+- 消息收发使用广播的方式
 
 ## 基本工作流程(从0开始)
 
@@ -40,6 +46,9 @@ sequenceDiagram
         participant S_Http as HTTP
         participant S_Service as 服务
         participant S_DB as 服务器DB
+    end
+    box Signal Server #LightGreen
+        participant S_Signal as WebRTC信令服务
     end
 
     rect rgba(220, 220, 250, 0.7)
@@ -73,26 +82,53 @@ sequenceDiagram
     %% (本次应该弹出Login页面)
         rect rgba(220, 220, 250, 0.7)
             Note right of C_UI: 显示注册/登录页面
-            C_UI->>C_UI: 弹出Login页面
+            C_UI->>C_UI: Push Login页面
             S_Endpoint-->>C_UI: 得到oauth_id和Refresh Token
             C_UI->>C_Net: 尝试登录
-            C_Net->>S_Http: 根据oauth_id和Refresh Token(实际由它得到的Access Token)获取ID
-            S_Http-->>S_Service: 返回ID, 没有则新建用户
+            C_Net->>S_Http: 根据oauth_id和Refresh Token(实际由它得到的Access Token)获取UserID
+            S_Http->>S_Service: 查找UserID
+            S_Service-->>S_Http: 拿到UserID, 没有则新建用户
+            S_Http-->>C_Net: 返回UserID
+            C_Net-->>C_UI: 登录成功
+            C_UI->>C_UI: Pop Login页面
         end
     end
     
-    %% 到这里, 已经登录成功, 可以根据ID从中心服务器获取各类信息
+    %% 到这里, 已经登录成功, 可以根据UserID从中心服务器获取各类信息
     %% 暂不考虑同一User多处登录时的列表同步
     
     %% 加载本地群聊数据, 展示Chat List页面, 进入App主循环
     %% 同时在后台异步同步/收发消息
-    
 
+    par
+        rect rgba(220, 220, 250, 0.7)
+            Note right of C_UI: App UI主循环
+            C_UI->>C_UI: 进入App主循环
+        end
+        rect rgba(220, 220, 250, 0.7)
+            Note right of C_UI: 同步Chat List(当前仅push/fetch)
+            %% 或者直接存JSON
+            C_Net->>S_Http: fetch Chat List
+            S_Http-->>C_Net: 返回Chat List JSON
+            C_Net->>C_DB: 全量更新数据库(Model)
+            C_DB->>C_UI: 更新View
+            %% TODO: 创建/加入/退出群聊???(还是要在中心服务器处理)
+            C_UI->>C_Net: 创建/加入/退出群聊
+            C_Net->>S_Http: 群聊请求
+            S_Http->>S_Service: 修改群聊信息
+        end
+        rect rgba(220, 220, 250, 0.7)
+            Note right of C_UI: 后台异步收发/同步消息
+            C_UI->>C_Net: 启动消息收发服务
+            C_Net->>S_Http: 通知服务器自己(UserID, PeerID)已经在线
+            S_Http->>S_Service: 更新在线状态
+        end
+    end
 ```
 
 ## 登录与鉴权
 
-使用第三方OA(Logto等), 通过oauth_id(OA的永久唯一标识符)得到唯一用户ID(未注册则新建)
+使用第三方OA(Logto等), 通过oauth_id(OA的永久唯一标识符)得到唯一用户UserID(未注册则新建)
 
 ## Client
 
@@ -106,7 +142,51 @@ sequenceDiagram
 - Contacts
 - Settings
 
-### 数据库
+### DataModel
+
+- Chat List
+    - 与中心服务器数据交换:
+    ```json
+    [
+        {
+            "group_id": 0, // 全局唯一
+            "group_name": "",
+            "members": [
+                {
+                    "user_id": 0, // 全局唯一
+                    "user_name": "",
+                    "online": false
+                }
+            ],
+            "type": "GROUP_CHAT|PRIVATE_CHAT|BOT" 
+        }
+    ]
+    ```
+    - Model:
+    ```sql
+    
+    ```
+- Group Messages
+    ```sql
+
+    ```
+- Contacts
+    - 与中心服务器数据交换:
+    ```json
+    [
+        {
+            "user_id": 0,
+            "user_name": "",
+            "online": false,
+            "group": "unimplemented"
+        }
+    ]
+    ```
+    - Model:
+    ```sql
+    
+    ```
+- Settings
 
 #### 设计原则
 
