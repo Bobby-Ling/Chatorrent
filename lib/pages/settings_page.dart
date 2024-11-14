@@ -1,6 +1,6 @@
 // lib/pages/settings_page.dart
 import 'package:flutter/material.dart';
-import 'package:chatorrent/model/server_config.dart';
+import 'package:chatorrent/schemas/server_config.dart';
 import 'package:chatorrent/services/preferences.dart';
 
 

@@ -1,4 +1,4 @@
-// lib/models/server_config.dart
+// lib/schemas/server_config.dart
 import 'dart:convert';
 import 'package:json_annotation/json_annotation.dart';
 

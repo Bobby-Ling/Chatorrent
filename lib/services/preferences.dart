@@ -2,7 +2,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:chatorrent/model/server_config.dart';
+import 'package:chatorrent/schemas/server_config.dart';
 
 class SettingsManager {
   static const String _keyUserId = 'userId';
