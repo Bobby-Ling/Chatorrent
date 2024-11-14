@@ -120,7 +120,7 @@ sequenceDiagram
         rect rgba(220, 220, 250, 0.7)
             Note right of C_UI: 后台异步收发/同步消息
             C_UI->>C_Net: 启动消息收发服务
-            C_Net->>S_Http: 通知服务器自己(UserID, PeerID)已经在线
+            C_Net->>S_Http: 通知服务器自己(UserID, PeerID)已经在线(建立websocket长连接, 断线则视为logout)
             S_Http->>S_Service: 更新在线状态
         end
     end
@@ -162,14 +162,6 @@ sequenceDiagram
         }
     ]
     ```
-    - Model:
-    ```sql
-    
-    ```
-- Group Messages
-    ```sql
-
-    ```
 - Contacts
     - 与中心服务器数据交换:
     ```json
@@ -178,16 +170,63 @@ sequenceDiagram
             "user_id": 0,
             "user_name": "",
             "online": false,
-            "group": "unimplemented"
+            "group": "unimplemented" // 联系人分分组, 未实现
         }
     ]
     ```
-    - Model:
+- User Info
+    - 与中心服务器数据交换:
+    ```json
+    {
+        "user_name": "",
+        // 一个User可以有多个peer(多设备)
+        "devices": [
+            {
+                "peer_id": 0, // 全局唯一
+                "description": "unimplemented", //设备友好名称, 未实现
+                "online": false,
+                "sessions": [ 0, 1, 2 ] // 两个peer间可以有多个session, 在client webrtc层通过session_id区分, session_id全局唯一
+            }
+        ]
+    }
+    ```
+- Group Messages
     ```sql
-    
+
     ```
 - Settings
-
+    - 仅Client使用
+    ```json
+    {
+        "webrtc": {
+            "iceServers": [
+                {
+                    "urls": [
+                        "stun:stun.l.google.com:19302",
+                        "stun:stun.l.google.com:5349"
+                    ]
+                },
+                {
+                    "urls": [
+                        "turn:relay1.expressturn.com:3478"
+                    ],
+                    "username": "efARMECFO0KUN06AGV",
+                    "credential": "3PSJgUoRo0lIU8aH"
+                }
+            ]
+        },
+        "signalServer": {
+            "host": "0.0.0.0",
+            "port": "8080",
+            "useSsl": false
+        },
+        "chatServer": {
+            "host": "0.0.0.0",
+            "port": "8080",
+            "useSsl": false
+        }
+    }
+    ```
 #### 设计原则
 
 1. 一个Group Chat中所有Member(User)的聊天记录表是一样的;
