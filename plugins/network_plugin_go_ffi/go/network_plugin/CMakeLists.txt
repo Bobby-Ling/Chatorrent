@@ -95,7 +95,7 @@ message("Go envs: CGO_ENABLED=$ENV{CGO_ENABLED} GOOS=$ENV{GOOS} GOARCH=$ENV{GOAR
 function(add_go_library target_name output_file go_arch go_arm cc)
     # if(CMAKE_SYSTEM_NAME STREQUAL "Android")
         # 折中办法, 因为在build时output_file为空(linux/windows正常, 存疑)
-        set(src_file_changed 0)
+        set(src_file_changed 1)
 
         message("output_file: ${output_file}")
         if(EXISTS ${output_file})
@@ -135,7 +135,7 @@ function(add_go_library target_name output_file go_arch go_arm cc)
         endif()
 
 
-        set(gen_file_changed 0)
+        set(gen_file_changed 1)
 
         message("GEN_SRCS: ${GEN_SRCS}")
         if(EXISTS ${GEN_SRCS})

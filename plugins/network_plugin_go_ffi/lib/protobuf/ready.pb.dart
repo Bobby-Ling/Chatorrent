@@ -1,6 +1,6 @@
 //
 //  Generated code. Do not modify.
-//  source: sessionmgr.proto
+//  source: ready.proto
 //
 // @dart = 2.12
 
@@ -15,15 +15,15 @@ import 'package:protobuf/protobuf.dart' as $pb;
 
 class Ready extends $pb.GeneratedMessage {
   factory Ready({
-    $core.int? sessionId,
-    $core.List<$core.int>? data,
+    $core.int? sessionID,
+    $core.List<$core.int>? dAtA,
   }) {
     final $result = create();
-    if (sessionId != null) {
-      $result.sessionId = sessionId;
+    if (sessionID != null) {
+      $result.sessionID = sessionID;
     }
-    if (data != null) {
-      $result.data = data;
+    if (dAtA != null) {
+      $result.dAtA = dAtA;
     }
     return $result;
   }
@@ -32,8 +32,8 @@ class Ready extends $pb.GeneratedMessage {
   factory Ready.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Ready', createEmptyInstance: create)
-    ..a<$core.int>(1, _omitFieldNames ? '' : 'sessionId', $pb.PbFieldType.O3)
-    ..a<$core.List<$core.int>>(2, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'SessionID', $pb.PbFieldType.O3, protoName: 'SessionID')
+    ..a<$core.List<$core.int>>(2, _omitFieldNames ? '' : 'dAtA', $pb.PbFieldType.OY, protoName: 'dAtA')
     ..hasRequiredFields = false
   ;
 
@@ -59,22 +59,22 @@ class Ready extends $pb.GeneratedMessage {
   static Ready? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.int get sessionId => $_getIZ(0);
+  $core.int get sessionID => $_getIZ(0);
   @$pb.TagNumber(1)
-  set sessionId($core.int v) { $_setSignedInt32(0, v); }
+  set sessionID($core.int v) { $_setSignedInt32(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasSessionId() => $_has(0);
+  $core.bool hasSessionID() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSessionId() => clearField(1);
+  void clearSessionID() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.List<$core.int> get data => $_getN(1);
+  $core.List<$core.int> get dAtA => $_getN(1);
   @$pb.TagNumber(2)
-  set data($core.List<$core.int> v) { $_setBytes(1, v); }
+  set dAtA($core.List<$core.int> v) { $_setBytes(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasData() => $_has(1);
+  $core.bool hasDAtA() => $_has(1);
   @$pb.TagNumber(2)
-  void clearData() => clearField(2);
+  void clearDAtA() => clearField(2);
 }
 
 

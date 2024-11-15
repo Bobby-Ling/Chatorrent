@@ -1,6 +1,6 @@
 //
 //  Generated code. Do not modify.
-//  source: communicate.proto
+//  source: ready.proto
 //
 // @dart = 2.12
 

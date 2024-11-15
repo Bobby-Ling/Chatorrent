@@ -27,7 +27,20 @@ class NetworkPluginGoFfiBindings {
           lookup)
       : _lookup = lookup;
 
-  /// CreateSession for offer side to create a session
+  void InitWebRTC(
+    ffi.Pointer<ffi.Char> Config,
+  ) {
+    return _InitWebRTC(
+      Config,
+    );
+  }
+
+  late final _InitWebRTCPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Char>)>>(
+          'InitWebRTC');
+  late final _InitWebRTC =
+      _InitWebRTCPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
+
   ffi.Pointer<ffi.Char> CreateSession(
     int SessionID,
   ) {
@@ -42,7 +55,6 @@ class NetworkPluginGoFfiBindings {
   late final _CreateSession =
       _CreateSessionPtr.asFunction<ffi.Pointer<ffi.Char> Function(int)>();
 
-  /// Offer return offer BASE64
   ffi.Pointer<ffi.Char> Offer(
     int SessionID,
   ) {
@@ -57,8 +69,6 @@ class NetworkPluginGoFfiBindings {
   late final _Offer =
       _OfferPtr.asFunction<ffi.Pointer<ffi.Char> Function(int)>();
 
-  /// JoinSession for answer side to join a session described by SDP
-  /// 假定sdpBase64是\0结尾字符串
   ffi.Pointer<ffi.Char> JoinSession(
     int SessionID,
     ffi.Pointer<ffi.Char> sdpBase64,
@@ -76,7 +86,6 @@ class NetworkPluginGoFfiBindings {
   late final _JoinSession = _JoinSessionPtr.asFunction<
       ffi.Pointer<ffi.Char> Function(int, ffi.Pointer<ffi.Char>)>();
 
-  /// Answer can be called after JoinSession
   ffi.Pointer<ffi.Char> Answer(
     int SessionID,
   ) {
@@ -91,8 +100,6 @@ class NetworkPluginGoFfiBindings {
   late final _Answer =
       _AnswerPtr.asFunction<ffi.Pointer<ffi.Char> Function(int)>();
 
-  /// ConfirmAnswer confirms a session description
-  /// 假定sdpBase64是\0结尾字符串
   ffi.Pointer<ffi.Char> ConfirmAnswer(
     int SessionID,
     ffi.Pointer<ffi.Char> sdpBase64,
@@ -110,7 +117,6 @@ class NetworkPluginGoFfiBindings {
   late final _ConfirmAnswer = _ConfirmAnswerPtr.asFunction<
       ffi.Pointer<ffi.Char> Function(int, ffi.Pointer<ffi.Char>)>();
 
-  /// Send add data to send queue, it is not a obstructive function
   ffi.Pointer<ffi.Char> Send(
     int SessionID,
     ffi.Pointer<ffi.Char> data,
@@ -130,8 +136,6 @@ class NetworkPluginGoFfiBindings {
   late final _Send = _SendPtr.asFunction<
       ffi.Pointer<ffi.Char> Function(int, ffi.Pointer<ffi.Char>, int)>();
 
-  /// Ready return a list of received messages and where are they from
-  /// 计划使用json返回
   ffi.Pointer<ffi.Char> Ready() {
     return _Ready();
   }
@@ -140,8 +144,6 @@ class NetworkPluginGoFfiBindings {
       _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>('Ready');
   late final _Ready = _ReadyPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
 
-  /// DropSession allow user to drop a session
-  /// Warning: don't call DropSession easily, because it is very slow; not-used session will be shutdown automatically
   ffi.Pointer<ffi.Char> DropSession(
     int SessionID,
   ) {
@@ -156,19 +158,21 @@ class NetworkPluginGoFfiBindings {
   late final _DropSession =
       _DropSessionPtr.asFunction<ffi.Pointer<ffi.Char> Function(int)>();
 
-  /// ReloadConfig will force SessionManager reload config from conf.json
-  /// warning: it may not work immediately
-  ffi.Pointer<ffi.Char> ReloadConfig() {
-    return _ReloadConfig();
+  ffi.Pointer<ffi.Char> ReloadConfig(
+    ffi.Pointer<ffi.Char> ConfJson,
+  ) {
+    return _ReloadConfig(
+      ConfJson,
+    );
   }
 
-  late final _ReloadConfigPtr =
-      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
-          'ReloadConfig');
-  late final _ReloadConfig =
-      _ReloadConfigPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+  late final _ReloadConfigPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<ffi.Char> Function(
+              ffi.Pointer<ffi.Char>)>>('ReloadConfig');
+  late final _ReloadConfig = _ReloadConfigPtr.asFunction<
+      ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>)>();
 
-  /// Discard a SessionManager
   ffi.Pointer<ffi.Char> Discard() {
     return _Discard();
   }

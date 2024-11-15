@@ -23,13 +23,13 @@ void main() {
     });
 
     test('isSuccess works correctly', () {
-      final successResponse = Response(
+      const successResponse = Response(
         error: ErrorInfo(code: 0, errStr: ''),
         sessionId: 1,
         data: 'data'
       );
 
-      final errorResponse = Response(
+      const errorResponse = Response(
         error: ErrorInfo(code: 1, errStr: 'error'),
         sessionId: 0,
         data: ''

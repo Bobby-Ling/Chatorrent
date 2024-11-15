@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 	"unsafe"
-	"webrtc_plugin/sessionmgr"
+	"webrtc_plugin/communicate"
 )
 
 // 使用`go build -buildmode=c-shared -o network_plugin.dll network_plugin.go`生成network_plugin.h
@@ -25,7 +25,7 @@ import (
 // 在example目录下运行flutter run等进行测试(可能需要改动main.dart)
 
 // 在一个App实例中唯一存在
-var globalMgr sessionmgr.SessionManager
+var globalMgr *communicate.CommString
 
 const (
 	Success     = 0
@@ -40,62 +40,59 @@ const (
 // 内存管理: 输入参数由外部负责, 返回值由自己负责(gc)
 // cgo能够接受的Api:
 
-var placeholder_response = `{"error":{"code":0,"err_str":"OK"},"session_id":123,"data":"test_data"}`
+//export InitWebRTC
+func InitWebRTC(Config *C.char) {
+	globalMgr = communicate.NewCommStringJson(C.GoString(Config))
+}
 
-// CreateSession for offer side to create a session
 //export CreateSession
 func CreateSession(SessionID C.int) *C.char {
-	return C.CString(placeholder_response)
+	return C.CString(globalMgr.CreateSession(int32(SessionID)))
 }
-// Offer return offer BASE64
+
 //export Offer
 func Offer(SessionID C.int) *C.char {
-	return C.CString(placeholder_response)
+    return C.CString(globalMgr.Offer(int32(SessionID)))
 }
-// JoinSession for answer side to join a session described by SDP
-// 假定sdpBase64是\0结尾字符串
+
 //export JoinSession
 func JoinSession(SessionID C.int, sdpBase64 *C.char) *C.char {
-	return C.CString(placeholder_response)
+    return C.CString(globalMgr.JoinSession(int32(SessionID), C.GoString(sdpBase64)))
 }
-// Answer can be called after JoinSession
+
 //export Answer
 func Answer(SessionID C.int) *C.char {
-	return C.CString(placeholder_response)
+    return C.CString(globalMgr.Answer(int32(SessionID)))
 }
-// ConfirmAnswer confirms a session description
-// 假定sdpBase64是\0结尾字符串
+
 //export ConfirmAnswer
 func ConfirmAnswer(SessionID C.int, sdpBase64 *C.char) *C.char {
-	return C.CString(placeholder_response)
+    return C.CString(globalMgr.ConfirmAnswer(int32(SessionID), C.GoString(sdpBase64)))
 }
-// Send add data to send queue, it is not a obstructive function
+
 //export Send
 func Send(SessionID C.int, data *C.char, size C.int) *C.char {
-	return C.CString(placeholder_response)
+	return C.CString(globalMgr.Send(int32(SessionID),  C.GoBytes(unsafe.Pointer(data), size)))
 }
-// Ready return a list of received messages and where are they from
-// 计划使用json返回
+
 //export Ready
 func Ready() *C.char {
-	return C.CString(placeholder_response)
+    return C.CString(globalMgr.Ready())
 }
-// DropSession allow user to drop a session
-// Warning: don't call DropSession easily, because it is very slow; not-used session will be shutdown automatically
+
 //export DropSession
 func DropSession(SessionID C.int) *C.char {
-	return C.CString(placeholder_response)
+    return C.CString(globalMgr.DropSession(int32(SessionID)))
 }
-// ReloadConfig will force SessionManager reload config from conf.json
-// warning: it may not work immediately
+
 //export ReloadConfig
-func ReloadConfig() *C.char {
-	return C.CString(placeholder_response)
+func ReloadConfig(ConfJson *C.char) *C.char {
+    return C.CString(globalMgr.ReloadConfig(C.GoString(ConfJson)))
 }
-// Discard a SessionManager
+
 //export Discard
 func Discard() *C.char {
-	return C.CString(placeholder_response)
+    return C.CString(globalMgr.Discard())
 }
 
 //export sum
@@ -115,7 +112,6 @@ func sum_long_running(a C.int, b C.int) C.int {
 	time.Sleep(4 * time.Second)
 	return C.int(response.StatusCode)
 }
-
 
 //export registerCallback
 func registerCallback(binop unsafe.Pointer) {

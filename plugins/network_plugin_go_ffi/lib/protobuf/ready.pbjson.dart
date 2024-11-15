@@ -1,6 +1,6 @@
 //
 //  Generated code. Do not modify.
-//  source: sessionmgr.proto
+//  source: ready.proto
 //
 // @dart = 2.12
 
@@ -17,13 +17,13 @@ import 'dart:typed_data' as $typed_data;
 const Ready$json = {
   '1': 'Ready',
   '2': [
-    {'1': 'session_id', '3': 1, '4': 1, '5': 5, '10': 'sessionId'},
-    {'1': 'data', '3': 2, '4': 1, '5': 12, '10': 'data'},
+    {'1': 'SessionID', '3': 1, '4': 1, '5': 5, '10': 'SessionID'},
+    {'1': 'dAtA', '3': 2, '4': 1, '5': 12, '10': 'dAtA'},
   ],
 };
 
 /// Descriptor for `Ready`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List readyDescriptor = $convert.base64Decode(
-    'CgVSZWFkeRIdCgpzZXNzaW9uX2lkGAEgASgFUglzZXNzaW9uSWQSEgoEZGF0YRgCIAEoDFIEZG'
-    'F0YQ==');
+    'CgVSZWFkeRIcCglTZXNzaW9uSUQYASABKAVSCVNlc3Npb25JRBISCgRkQXRBGAIgASgMUgRkQX'
+    'RB');
 
